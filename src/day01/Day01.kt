@@ -1,4 +1,4 @@
-package day1
+package day01
 
 import assertEqual
 import assertNotEqual
@@ -68,14 +68,14 @@ fun main() {
     }
 
     // test if implementation meets criteria from the description, like:
-    val testInput = readInput("day1/Day01_test")
+    val testInput = readInput("day01/Day01_test")
     assertEqual(part1(testInput), 142)
 
-    val input = readInput("day1/Day01")
+    val input = readInput("day01/Day01")
     part1(input).println()
 
-    assertEqual(part2(readInput("day1/Day01_test2")), 281)
-    assertEqual(part2(readInput("day1/Day01_test2_2")), 98)
+    assertEqual(part2(readInput("day01/Day01_test2")), 281)
+    assertEqual(part2(readInput("day01/Day01_test2_2")), 98)
     assertNotEqual(part2(input), 54683)
     part2(input).println()
 }
