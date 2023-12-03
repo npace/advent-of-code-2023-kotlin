@@ -9,6 +9,10 @@ fun main() {
     assertEqual(part1(testInput1), 4361)
     val input = readInput("day03/Day03")
     log(part1(input))
+
+    assertEqual(part2(testInput1), 467835)
+    // 73201705
+    log(part2(input))
 }
 
 fun part1(input: List<String>): Int {
@@ -20,11 +24,46 @@ fun part1(input: List<String>): Int {
         .sumOf { it.value }
 }
 
+fun part2(input: List<String>): Int {
+    val allNumbers = input.flatMapIndexed { index, line ->
+        line.readNumbers(index)
+    }
+    val ratios = mutableListOf<Int>()
+    input.forEachIndexed { index, line ->
+        line.forEachIndexed { lineIndex, c ->
+            if (c == '*') {
+                val gearRatio = gearRatio(allNumbers, lineIndex, index)
+                if (gearRatio > 0) {
+                    ratios.add(gearRatio)
+                }
+            }
+        }
+    }
+    return ratios.sum()
+}
+
+private fun gearRatio(allNumbers: List<Number>, gearX: Int, gearY: Int): Int {
+    val adjacentNumbers = mutableListOf<Number>()
+    allNumbers.forEach { number ->
+        if (gearY in number.adjacentY && gearX in number.adjacentX) {
+            adjacentNumbers.add(number)
+        }
+    }
+    return if (adjacentNumbers.size == 2) {
+        (adjacentNumbers[0].value * adjacentNumbers[1].value)
+    } else {
+        0
+    }
+}
+
 private data class Number(
     val value: Int,
     val lineIndex: Int,
     val positionInLine: IntRange,
-)
+) {
+    val adjacentX = (positionInLine.first - 1)..(positionInLine.last + 1)
+    val adjacentY = lineIndex - 1..lineIndex + 1
+}
 
 private class NumberReader(private val lineNumber: Int, private val line: String) {
     private var numberStringBuilder: StringBuilder? = null
