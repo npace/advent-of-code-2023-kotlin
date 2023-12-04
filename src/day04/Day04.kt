@@ -10,6 +10,9 @@ fun main() {
     assertEqual(part1(testInput1), 13)
     val input = readInput("day04/Day04")
     log(part1(input))
+
+    assertEqual(part2(testInput1), 30)
+    log(part2(input))
 }
 
 data class Card(
@@ -23,16 +26,40 @@ private fun part1(input: List<String>): Int {
         .sumOf(::calculateWinning)
 }
 
-private fun calculateWinning(card: Card): Int {
+private fun part2(input: List<String>): Int {
+    val cards = input
+        .map(::parseCard)
+    return calculateNumberOfCardsWon(cards)
+}
+
+private fun guessedNumbers(card: Card): List<Int> {
     val winningNumbersMap = card.winningNumbers.associateWith { true }
-    val guessedNumbersCount = card.playerNumbers
+    return card.playerNumbers
         .filter { winningNumbersMap.getOrDefault(it, false) }
-        .size
+}
+
+private fun calculateWinning(card: Card): Int {
+    val guessedNumbersCount = guessedNumbers(card).size
     return if (guessedNumbersCount == 0) {
         0
     } else {
         BigInteger.valueOf(2).pow(guessedNumbersCount - 1).toInt()
     }
+}
+
+private fun calculateNumberOfCardsWon(cards: List<Card>): Int {
+    val cardInstances = MutableList(cards.size) { 1 }
+    cardInstances.forEachIndexed { index, _ ->
+        if (index < cards.lastIndex) {
+            repeat(cardInstances[index]) {
+                val guessedNumbersCount = guessedNumbers(cards[index]).size
+                (index + 1..index + guessedNumbersCount).forEach {
+                    cardInstances[it] = cardInstances[it] + 1
+                }
+            }
+        }
+    }
+    return cardInstances.sum()
 }
 
 private fun parseCard(line: String): Card {
