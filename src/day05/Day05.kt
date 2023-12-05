@@ -51,7 +51,7 @@ fun part2(input: List<String>): Long {
     return mappings.find { it.first == "location" }!!.second.min()
 }
 
-private fun parseSeedRanges(seeds: List<Long>): List<LongRange> {
+private fun parseSeedRanges(seeds: Sequence<Long>): Sequence<LongRange> {
     val seedRanges = seeds.windowed(2, 2)
     return seedRanges.map {
         val (start, size) = it
@@ -59,12 +59,12 @@ private fun parseSeedRanges(seeds: List<Long>): List<LongRange> {
     }
 }
 
-private fun parseSeeds(input: List<String>): List<Long> {
-    return input[0].substringAfter(":").split(" ").filter { it.isNotEmpty() }
-        .map { it.toLong() }
+private fun parseSeeds(input: List<String>): Sequence<Long> {
+    return input.first().substringAfter(":").split(" ").filter { it.isNotEmpty() }
+        .map { it.toLong() }.asSequence()
 }
 
-private fun parseAlmanacMaps(input: List<String>): List<AlmanacMap> {
+private fun parseAlmanacMaps(input: List<String>): Sequence<AlmanacMap> {
     val maps = mutableListOf(mutableListOf<String>())
     input.drop(2).forEach { line ->
         if (line.isNotBlank()) {
@@ -80,10 +80,10 @@ private fun parseAlmanacMaps(input: List<String>): List<AlmanacMap> {
             AlmanacBlock(dst, src, len)
         }
         AlmanacMap(from, to, mappings)
-    }
+    }.asSequence()
 }
 
-private fun calculateMappings(seeds: List<Long>, almanacMaps: List<AlmanacMap>): List<Pair<String, List<Long>>> {
+private fun calculateMappings(seeds: Sequence<Long>, almanacMaps: Sequence<AlmanacMap>): Sequence<Pair<String, Sequence<Long>>> {
     val mappings = mutableListOf("seed" to seeds)
     almanacMaps.forEach { almanacMap ->
         val fromVals = mappings.last().second
@@ -103,5 +103,5 @@ private fun calculateMappings(seeds: List<Long>, almanacMaps: List<AlmanacMap>):
         }.flatten()
         mappings.add(almanacMap.to to toVals)
     }
-    return mappings
+    return mappings.asSequence()
 }
