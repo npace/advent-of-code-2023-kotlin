@@ -48,32 +48,31 @@ private fun parseReport(input: List<String>): Report {
 
 private fun Report.predictNextValues(): List<Long> {
     val lastValues = map { it.last() }.reversed()
-    val predictions = lastValues.foldIndexed(mutableListOf<Long>()) { index, acc, lastValue ->
-        acc.add(
-            if (index == 0) {
-                0
-            } else {
-                lastValue + acc[index - 1]
-            }
-        )
-        acc
+    val predictions = lastValues.generatePredictions { currentRowValue, previousRowPredictedValue ->
+        currentRowValue + previousRowPredictedValue
     }
     return predictions
 }
 
 private fun Report.predictPreviousValues(): List<Long> {
     val firstValues = map { it.first() }.reversed()
-    val predictions = firstValues.foldIndexed(mutableListOf<Long>()) { index, acc, firstValue ->
+    val predictions = firstValues.generatePredictions { currentRowValue, previousRowPredictedValue ->
+        currentRowValue - previousRowPredictedValue
+    }
+    return predictions
+}
+
+private fun List<Long>.generatePredictions(predictor: (Long, Long) -> Long): List<Long> {
+    return foldIndexed(mutableListOf()) { index, acc, firstValue ->
         acc.add(
             if (index == 0) {
                 0
             } else {
-                firstValue - acc[index - 1]
+                predictor(firstValue, acc[index - 1])
             }
         )
         acc
     }
-    return predictions
 }
 
 private fun List<Long>.getDifferenceSequences(): Report {
