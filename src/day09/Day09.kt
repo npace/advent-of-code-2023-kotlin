@@ -8,16 +8,17 @@ fun main() {
     val testInput1 = readInput("day09/Day09_test")
     val input = readInput("day09/Day09")
 
-    val startTime = System.currentTimeMillis()
+    var startTime = System.currentTimeMillis()
     assertEqual(part1(testInput1), 114L)
     log("Part 1 result: ${part1(input)}, took ${System.currentTimeMillis() - startTime}ms")
+
+    startTime = System.currentTimeMillis()
+    assertEqual(part2(testInput1), 2L)
+    log("Part 2 result: ${part2(input)}, took ${System.currentTimeMillis() - startTime}ms")
 }
 
 private fun part1(input: List<String>): Long {
-    log(input)
-    val report = input
-        .map { line -> line.split(" ").map { it.toLong() } }
-    val results = report.map { valueHistory ->
+    val results = parseReport(input).map { valueHistory ->
         valueHistory
             .getDifferenceSequences()
             .predictNextValues()
@@ -27,7 +28,25 @@ private fun part1(input: List<String>): Long {
     return results.sum()
 }
 
-private fun List<List<Long>>.predictNextValues(): List<Long> {
+private fun part2(input: List<String>): Long {
+    log(input)
+    val results = parseReport(input).map { valueHistory ->
+        valueHistory
+            .getDifferenceSequences()
+            .predictPreviousValues()
+            .last()
+    }
+    return results.sum()
+}
+
+typealias Report = List<List<Long>>
+
+private fun parseReport(input: List<String>): Report {
+    return input
+        .map { line -> line.split(" ").map { it.toLong() } }
+}
+
+private fun Report.predictNextValues(): List<Long> {
     val lastValues = map { it.last() }.reversed()
     val predictions = lastValues.foldIndexed(mutableListOf<Long>()) { index, acc, lastValue ->
         acc.add(
@@ -42,7 +61,22 @@ private fun List<List<Long>>.predictNextValues(): List<Long> {
     return predictions
 }
 
-private fun List<Long>.getDifferenceSequences(): List<List<Long>> {
+private fun Report.predictPreviousValues(): List<Long> {
+    val firstValues = map { it.first() }.reversed()
+    val predictions = firstValues.foldIndexed(mutableListOf<Long>()) { index, acc, firstValue ->
+        acc.add(
+            if (index == 0) {
+                0
+            } else {
+                firstValue - acc[index - 1]
+            }
+        )
+        acc
+    }
+    return predictions
+}
+
+private fun List<Long>.getDifferenceSequences(): Report {
     var values = this
     val allSequences = mutableListOf(values)
     while (values.any { it != 0L }) {
