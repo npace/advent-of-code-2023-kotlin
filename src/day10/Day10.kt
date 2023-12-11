@@ -24,7 +24,6 @@ private fun part1(input: List<String>): Int {
     })
 
     val loop = grid.findLoop()
-    log("Loop containing creature: $loop")
     grid.printInGrid(loop)
     return loop.size / 2
 }
@@ -165,7 +164,15 @@ enum class Tile(val symbol: Char, private vararg val connections: Direction) {
     }
 
     override fun toString(): String {
-        return symbol.toString()
+        return when (this) {
+            UpToDown -> "┃"
+            LeftToRight -> "━"
+            UpToRight -> "┗"
+            RightToDown -> "┏"
+            LeftToDown -> "┓"
+            UpToLeft -> "┛"
+            else -> symbol.toString()
+        }
     }
 }
 
