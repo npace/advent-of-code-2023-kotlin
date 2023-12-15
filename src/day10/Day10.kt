@@ -17,12 +17,7 @@ fun main() {
 
 private fun part1(input: List<String>): Int {
     log(input.joinToString("\n"))
-    val grid = Grid(input.mapIndexed { yIndex, line ->
-        line.mapIndexed { xIndex, char ->
-            GridElement(xIndex, yIndex, char.parse())
-        }
-    })
-
+    val grid = input.parseGrid()
     val loop = grid.findLoop()
     grid.printInGrid(loop)
     return loop.size / 2
@@ -176,6 +171,14 @@ enum class Tile(val symbol: Char, private vararg val connections: Direction) {
     }
 }
 
-private fun Char.parse(): Tile {
+private fun List<String>.parseGrid(): Grid {
+    return Grid(mapIndexed { yIndex, line ->
+        line.mapIndexed { xIndex, char ->
+            GridElement(xIndex, yIndex, char.parseTile())
+        }
+    })
+}
+
+private fun Char.parseTile(): Tile {
     return Tile.entries.first { it.symbol == this }
 }
