@@ -3,31 +3,74 @@ package day10
 import assertEqual
 import log
 import readInput
+import kotlin.math.absoluteValue
 
 fun main() {
     val testInput1 = readInput("day10/Day10_test")
     val testInput2 = readInput("day10/Day10_test2")
+    val testInput3 = readInput("day10/Day10_test3")
     val input = readInput("day10/Day10")
 
-    val startTime = System.currentTimeMillis()
+    var startTime = System.currentTimeMillis()
     assertEqual(part1(testInput1), 4)
     assertEqual(part1(testInput2), 8)
     log("Part 1 result: ${part1(input)}, took ${System.currentTimeMillis() - startTime}ms")
+
+    startTime = System.currentTimeMillis()
+    assertEqual(part2(testInput3), 4)
+    log("Part 2 result: ${part2(input)}, took ${System.currentTimeMillis() - startTime}ms")
 }
 
 private fun part1(input: List<String>): Int {
+    log("Part 1:")
     log(input.joinToString("\n"))
     val grid = input.parseGrid()
-    val loop = grid.findLoop()
+    val loop = grid.loop
     grid.printInGrid(loop)
     return loop.size / 2
 }
 
-class Grid(private val gridElements: List<List<GridElement>>) {
+private fun part2(input: List<String>): Int {
+    log("Part 2:")
+    log(input.joinToString("\n"))
+    val grid = input.parseGrid()
+    val loop = grid.loop
+    grid.printInGrid(loop)
+    return grid.countEnclosedTiles()
+        .also { log("Enclosed tiles: $it") }
+}
+
 class Grid(private val elements: List<List<GridElement>>) {
     private val creature = findCreature()
 
-    fun findLoop(): Collection<GridElement> {
+    val loop: List<GridElement> by lazy {
+        findLoop()
+    }
+
+    fun countEnclosedTiles(): Int {
+        // Pick's theorem:
+        // A = i + (b/2) - 1
+        // i = A -(b/2) + 1
+        val loopArea = calculateLoopArea()
+        val boundaryPointsCount = loop.count()
+        val enclosedPoints = loopArea - (boundaryPointsCount / 2) + 1
+        return enclosedPoints
+    }
+
+    private fun calculateLoopArea(): Int {
+        // Shoelace formula:
+        val leftLace = mutableListOf<Int>()
+        val rightLace = mutableListOf<Int>()
+        for (index in loop.indices) {
+            val nextIndex = (index + 1) % loop.size
+            leftLace.add(loop[index].x * loop[nextIndex].y)
+            rightLace.add(loop[index].y * loop[nextIndex].x)
+        }
+        val signedArea = (leftLace.sum() - rightLace.sum()) / 2
+        return signedArea.absoluteValue
+    }
+
+    private fun findLoop(): List<GridElement> {
         log("Creature is at ${creature.x}, ${creature.y}")
         val (startTile, startDirection) = creatureTileAndDirections()
         log("Start Tile:\n$startTile")
@@ -43,7 +86,7 @@ class Grid(private val elements: List<List<GridElement>>) {
             current = current.goInDirection(currentDirection)!!
         }
 
-        return loop
+        return loop.toList()
     }
 
     private fun findCreature(): GridElement {
@@ -55,8 +98,6 @@ class Grid(private val elements: List<List<GridElement>>) {
         val up = creature.upElement()
         val right = creature.rightElement()
         val down = creature.downElement()
-        log("Adjacent tiles are:")
-        printInGrid(listOfNotNull(left, up, right, down))
         val potentialTilesForCreature = mutableListOf<Pair<Tile, Direction>>()
         if (left.connectsRight() && up.connectsDown()) {
             potentialTilesForCreature.add(Tile.UpToLeft to Direction.Up)
