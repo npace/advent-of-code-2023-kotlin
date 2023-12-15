@@ -24,6 +24,7 @@ private fun part1(input: List<String>): Int {
 }
 
 class Grid(private val gridElements: List<List<GridElement>>) {
+class Grid(private val elements: List<List<GridElement>>) {
     private val creature = findCreature()
 
     fun findLoop(): Collection<GridElement> {
@@ -46,7 +47,7 @@ class Grid(private val gridElements: List<List<GridElement>>) {
     }
 
     private fun findCreature(): GridElement {
-        return gridElements.flatten().first { it.tile == Tile.Creature }
+        return elements.flatten().first { it.tile == Tile.Creature }
     }
 
     private fun creatureTileAndDirections(): Pair<Tile, Direction> {
@@ -101,16 +102,16 @@ class Grid(private val gridElements: List<List<GridElement>>) {
     private fun GridElement.rightElement(): GridElement? = elementAt(x + 1, y)
 
     private fun elementAt(x: Int, y: Int): GridElement? {
-        val isInBounds = x < 0 || x > gridElements.size
-                || y < 0 || y > gridElements.first().size
+        val isInBounds = x < 0 || x > elements.size
+                || y < 0 || y > elements.first().size
         return if (isInBounds)
             null
         else
-            gridElements[y][x]
+            elements[y][x]
     }
 
     fun printInGrid(subGroup: Collection<GridElement>) {
-        gridElements.forEach { line ->
+        elements.forEach { line ->
             log(buildString {
                 line.forEach { element ->
                     if (element in subGroup) {
@@ -124,7 +125,7 @@ class Grid(private val gridElements: List<List<GridElement>>) {
     }
 
     override fun toString(): String {
-        return gridElements.joinToString("\n")
+        return elements.joinToString("\n")
     }
 }
 
